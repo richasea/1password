@@ -1,3 +1,6 @@
 #ignore compiled libraries
 *.pyc
 
+
+# swap files
+*.swp
