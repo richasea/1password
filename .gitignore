@@ -1,6 +1,6 @@
 #ignore compiled libraries
 *.pyc
-
-
+#build directory
+build
 # swap files
 *.swp
