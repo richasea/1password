@@ -148,6 +148,8 @@ class Vault(object):
     def headers(self):
         "Vault contents headers"
         keys = self._items.keys()
+        blacklist = ["system.folder.Regular"]
+        keys = [key for key in keys if key not in blacklist]
         mapped = [Vault._key_to_header(k) for k in keys]
         mapped.sort()
         return mapped
