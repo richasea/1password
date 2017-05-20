@@ -4,3 +4,5 @@
 build
 # swap files
 *.swp
+# ignore virtual env directory
+1password
