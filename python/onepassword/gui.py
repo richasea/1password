@@ -21,6 +21,7 @@ class Gui(object):
         self._index = 0
         self._vault = None
         self._tab = 0
+        self._scroll_limit = 0
 
     def setup(self, vault):
         """
@@ -60,9 +61,14 @@ class Gui(object):
         headers = self._vault.headers
         curtab = headers[self._tab]
         items = self._vault[curtab]
+        self._scroll_limit = len(items)
         (height, _) = self._screen.getmaxyx()
         for (name, _) in items:
-            self._screen.addstr(index, 0, name)
+            if index - 2 == self._index:
+                attributes = curses.A_BOLD
+            else:
+                attributes = curses.A_NORMAL
+            self._screen.addstr(index, 0, name, attributes)
             index += 1
             if index == height:
                 break
@@ -84,8 +90,9 @@ class Gui(object):
             if key == ord('q') or key == ord('Q'):
                 break
             elif key == curses.KEY_DOWN:
-                self._index += 1
-                self.render_items()
+                if self._index + 1 < self._scroll_limit:
+                    self._index += 1
+                    self.render_items()
             elif key == curses.KEY_UP:
                 if self._index == 0:
                     continue
