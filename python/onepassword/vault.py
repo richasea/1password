@@ -4,19 +4,37 @@ Email: richasea<at>gmail.com
 Description: A class to encapsulate access to 1Password vaults.
 """
 
+import base64
+import getpass
 import glob
+import hashlib
 import os
 import json
 
+from pbkdf2 import PBKDF2
+from Crypto.Cipher import AES
+
+from onepassword.plist import PropertyList
+
 class Vault(object):
     """
-    Encapsulation of a 1Password vault.
+    iEncapsulation of a 1Password vault.
     """
 
     def __init__(self, path):
         self._path = path
         self._accounts = dict()
+        self._properties = None
+        self._encryption_key = None
+
+        self._load_properties()
         self._load_accounts()
+
+    def _load_properties(self):
+        "Loads vault properties"
+        properties_file = os.path.join(self._path, "data", "default", "1password.keys")
+        self._properties = PropertyList()
+        self._properties.load(properties_file)
 
     def _load_accounts(self):
         "Loads the account json files"
@@ -30,6 +48,61 @@ class Vault(object):
                 contents = json.load(stream)
                 name = contents["title"]
                 self._accounts[account] = name
+
+    def decrypt(self):
+        """
+        Decrypts the password vault.
+        """
+        password = getpass.getpass("Password: ")
+        for datum in self._properties.data["list"]:
+            if datum["level"] == "SL5":
+                iterations = datum["iterations"]
+                data = datum["data"]
+                (salt, data) = Vault._parse_data(data)
+                password_hash = PBKDF2(password, salt, iterations).read(32)
+                (key, init_vector) = (password_hash[:16], password_hash[16:])
+                aes = AES.new(key, AES.MODE_CBC, init_vector)
+
+                encryption_key = aes.decrypt(data)[:1024]
+
+                (vsalt, vdata) = Vault._parse_data(datum["validation"])
+                (vkey, viv) = Vault._gen_key_iv(encryption_key, vsalt)
+                aes = AES.new(vkey, AES.MODE_CBC, viv)
+                vdata = aes.decrypt(vdata)[:1024]
+
+                if vdata == encryption_key:
+                    self._encryption_key = encryption_key
+                    return True
+        return False
+
+    @staticmethod
+    def _parse_data(data):
+        """
+        Parse account data.
+        """
+        data = base64.b64decode(data.strip())
+        if data[:8] == b"Salted__":
+            (salt, data) = (data[8:16], data[16:])
+            return (salt, data)
+        else:
+            raise NotImplementedError("Only salted data is supported")
+
+    @staticmethod
+    def _gen_key_iv(password, salt):
+        """
+        Generates an IV and key given a password and salt.
+        """
+        rounds = 2
+        data = password + salt
+        md5s = [hashlib.md5(data)]
+        result = md5s[0].digest()
+        for i in range(1, rounds):
+            new_md5 = hashlib.md5(md5s[i-1].digest() + data)
+            md5s.append(new_md5)
+            result = result + new_md5.digest()
+        key = result[:16]
+        the_iv = result[16:]
+        return (key, the_iv)
 
     @property
     def path(self):
