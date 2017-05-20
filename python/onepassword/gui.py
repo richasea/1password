@@ -20,6 +20,7 @@ class Gui(object):
         self._screen = None
         self._index = 0
         self._vault = None
+        self._tab = 0
 
     def setup(self, vault):
         """
@@ -36,27 +37,42 @@ class Gui(object):
         """
         Renders the columns for the UI.
         """
-        self._screen.addstr(0, 0, "Account")
+        pos = 0
+        index = 0
+        for header in self._vault.headers:
+            if index == self._tab:
+                attribute = curses.A_BOLD
+            else:
+                attribute = curses.A_NORMAL
+
+            self._screen.addstr(0, pos, header, attribute)
+            index += 1
+            pos += len(header) + 1
+
         (_, width) = self._screen.getmaxyx()
         self._screen.hline(1, 0, curses.ACS_HLINE, width)
 
-    def render_accounts(self):
+    def render_items(self):
         """
         Renders account information.
         """
         index = 2
-        #self._screen.bkgd(' ', curses.color_pair(1))
-        accounts = list(self._vault.accounts)
-        accounts.sort()
+        headers = self._vault.headers
+        curtab = headers[self._tab]
+        items = self._vault[curtab]
         (height, _) = self._screen.getmaxyx()
-        for account in accounts:
-            if index - 2 == self._index:
-                self._screen.addstr(index, 0, account, curses.A_BOLD)
-            else:
-                self._screen.addstr(index, 0, account)
-            index = index + 1
+        for (name, _) in items:
+            self._screen.addstr(index, 0, name)
+            index += 1
             if index == height:
                 break
+        self._screen.refresh()
+
+    def _on_tab_changed(self):
+        self._screen.erase()
+        self.render_headers()
+        self._index = 0
+        self.render_items()
         self._screen.refresh()
 
     def main_loop(self):
@@ -69,13 +85,21 @@ class Gui(object):
                 break
             elif key == curses.KEY_DOWN:
                 self._index += 1
-                self.render_accounts()
+                self.render_items()
             elif key == curses.KEY_UP:
                 if self._index == 0:
                     continue
                 else:
                     self._index -= 1
-                    self.render_accounts()
+                    self.render_items()
+            elif key == curses.KEY_LEFT:
+                if self._tab > 0:
+                    self._tab -= 1
+                    self._on_tab_changed()
+            elif key == curses.KEY_RIGHT:
+                if self._tab < len(self._vault.headers) - 1:
+                    self._tab += 1
+                    self._on_tab_changed()
 
     @staticmethod
     def teardown():

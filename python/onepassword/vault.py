@@ -106,6 +106,18 @@ class Vault(object):
         the_iv = result[16:]
         return (key, the_iv)
 
+    def __getitem__(self, header):
+        """
+        Takes a header and gets all items that match.
+        """
+        key = Vault._header_to_key(header)
+        if key not in self._items:
+            return []
+
+        pairs = [(i["title"], i["uuid"]) for i in self._items[key]]
+        pairs.sort(key=lambda p: p[0])
+        return pairs
+
     @property
     def path(self):
         "The vault path"
@@ -115,11 +127,12 @@ class Vault(object):
     def headers(self):
         "Vault contents headers"
         keys = self._items.keys()
-        mapped = [Vault._header_to_string(k) for k in keys]
+        mapped = [Vault._key_to_header(k) for k in keys]
+        mapped.sort()
         return mapped
 
     @staticmethod
-    def _header_to_string(header):
+    def _key_to_header(key):
         lookup = {
             "webforms.WebForm" : "Logins",
             "passwords.Password": "Passwords",
@@ -128,6 +141,21 @@ class Vault(object):
             "wallet.computer.License" : "Licenses",
             "securenotes.SecureNote" : "Notes",
             "system.folder.Regular" : "Folders"
+            }
+        if key in lookup:
+            return lookup[key]
+        return "?"
+
+    @staticmethod
+    def _header_to_key(header):
+        lookup = {
+            "Logins" : "webforms.WebForm",
+            "Passwords" : "passwords.Password",
+            "Generic Accounts" : "wallet.onlineservices.GenericAccount",
+            "Credit Cards" : "wallet.financial.CreditCard",
+            "Licenses" : "wallet.computer.License",
+            "Notes" : "securenotes.SecureNote",
+            "Folders" : "system.folder.Regular",
             }
         if header in lookup:
             return lookup[header]
