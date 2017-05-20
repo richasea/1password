@@ -20,7 +20,7 @@ sudo ./setup.py install
 First create a config file in your home directory called '.1password'
 it should look similar to this:
 ```
-[vaults]
+[vault]
 path=/path/to/password.agilekeychain
 ```
 
