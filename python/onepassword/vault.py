@@ -23,12 +23,12 @@ class Vault(object):
 
     def __init__(self, path):
         self._path = path
-        self._accounts = dict()
+        self._items = dict()
         self._properties = None
         self._encryption_key = None
 
         self._load_properties()
-        self._load_accounts()
+        self._load_items()
 
     def _load_properties(self):
         "Loads vault properties"
@@ -36,7 +36,7 @@ class Vault(object):
         self._properties = PropertyList()
         self._properties.load(properties_file)
 
-    def _load_accounts(self):
+    def _load_items(self):
         "Loads the account json files"
         data_dir = "data"
         vault_dir = "default"
@@ -46,8 +46,10 @@ class Vault(object):
         for account in accounts:
             with open(account) as stream:
                 contents = json.load(stream)
-                name = contents["title"]
-                self._accounts[account] = name
+                item_type = contents["typeName"]
+                if not item_type in self._items:
+                    self._items[item_type] = list()
+                self._items[item_type].append(contents)
 
     def decrypt(self):
         """
@@ -110,6 +112,28 @@ class Vault(object):
         return self._path
 
     @property
+    def headers(self):
+        "Vault contents headers"
+        keys = self._items.keys()
+        mapped = [Vault._header_to_string(k) for k in keys]
+        return mapped
+
+    @staticmethod
+    def _header_to_string(header):
+        lookup = {
+            "webforms.WebForm" : "Logins",
+            "passwords.Password": "Passwords",
+            "wallet.onlineservices.GenericAccount" : "Generic Accounts",
+            "wallet.financial.CreditCard" : "Credit Cards",
+            "wallet.computer.License" : "Licenses",
+            "securenotes.SecureNote" : "Notes",
+            "system.folder.Regular" : "Folders"
+            }
+        if header in lookup:
+            return lookup[header]
+        return "?"
+
+    @property
     def accounts(self):
         "Accounts stored in the vault"
-        return self._accounts.values()
+        return []
