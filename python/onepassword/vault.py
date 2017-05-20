@@ -136,7 +136,7 @@ class Vault(object):
             return []
 
         pairs = [(i["title"], i["uuid"]) for i in self._items[key]]
-        pairs.sort(key=lambda p: p[0])
+        pairs.sort(key=lambda p: p[0].lower())
         return pairs
 
     @property
