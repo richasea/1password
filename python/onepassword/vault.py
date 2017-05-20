@@ -18,7 +18,7 @@ from onepassword.plist import PropertyList
 
 class Vault(object):
     """
-    iEncapsulation of a 1Password vault.
+    Encapsulation of a 1Password vault.
     """
 
     def __init__(self, path):
@@ -76,7 +76,7 @@ class Vault(object):
                     self._encryption_key = encryption_key
                     return True
         return False
-    
+
     def decrypt_item(self, lookval):
         """
         Decrypts a value in the vault.
@@ -86,6 +86,7 @@ class Vault(object):
                 if item["uuid"] == lookval:
                     data = item["encrypted"]
                     (salt, data) = Vault._parse_data(data)
+                    #pylint: disable=invalid-name
                     (key, iv) = Vault._gen_key_iv(self._encryption_key, salt)
                     aes = AES.new(key, AES.MODE_CBC, iv)
                     plain = aes.decrypt(data)
@@ -95,7 +96,6 @@ class Vault(object):
                     strval = plain.decode("utf-8", "ignore")
                     return json.loads(strval)
 
-                    
         raise RuntimeError("Item not found!")
 
     @staticmethod

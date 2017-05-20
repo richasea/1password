@@ -107,6 +107,44 @@ class Gui(object):
                 if self._tab < len(self._vault.headers) - 1:
                     self._tab += 1
                     self._on_tab_changed()
+            elif key == curses.KEY_ENTER or key == ord('\n'):
+                self._display_item()
+                # break
+
+    def _construct_window(self, item_dict):
+        longest_key = max([len(k) for k in item_dict.keys()])
+        longest_value = max([len(str(v)) for v in item_dict.values()])
+        new_width = longest_key + 4 + longest_value
+        new_height = len(item_dict.items()) + 2
+        (screen_height, screen_width) = self._screen.getmaxyx()
+        y_pos = int(screen_height / 2 - new_height / 2)
+        x_pos = int(screen_width / 2 - new_width / 2)
+        new_window = curses.newwin(new_height, new_width, y_pos, x_pos)
+        new_window.overlay(self._screen)
+        new_window.border()
+        return new_window
+
+    def _display_item(self):
+        header_item = self._vault.headers[self._tab]
+        (_, lookval) = self._vault[header_item][self._index]
+        item_dict = self._vault.decrypt_item(lookval)
+        if "sections" in item_dict:
+            del item_dict["sections"]
+        new_window = self._construct_window(item_dict)
+        longest_key = max([len(k) for k in item_dict.keys()])
+        index = 1
+        for key, value in item_dict.items():
+            new_window.addstr(index, 1, key + ":", curses.A_BOLD)
+            new_window.addstr(index, longest_key + 2, str(value))
+            index += 1
+        self._screen.refresh()
+        while True:
+            key = new_window.getch()
+            if key == 27: # ESC OR ALT
+                break
+        del new_window
+        self._screen.touchwin()
+        self._screen.refresh()
 
     @staticmethod
     def teardown():
