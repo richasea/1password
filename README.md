@@ -15,3 +15,17 @@ And then install the software itself.
 ```bash
 sudo ./setup.py install
 ```
+
+## Usage:
+First create a config file in your home directory called '.1password'
+it should look similar to this:
+```
+[vaults]
+path=/path/to/password.agilekeychain
+```
+
+You can then run 1password from the command line.
+You will be prompted to enter a password, once this is complete you will be presented with a gui. I use that term loosely.
+Use up down left and right to select the entry, and press enter to view it.
+Use ESC to close the window.
+Use 'Q' to exit the application.
