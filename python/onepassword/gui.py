@@ -113,9 +113,13 @@ class Gui(object):
 
     @staticmethod
     def _filter_display_items(items_dict):
-        blacklist_keys = ["sections"]
+        blacklist_keys = ["sections", "fields", "URLs", "notesPlain", "passwordHistory"]
         allowed = {k: v for k, v in items_dict.items() if  v != "" and k not in blacklist_keys}
-        return allowed
+        valid_types = {k: v for k, v in allowed.items() if isinstance(v, str)}
+        if valid_types.items():
+            return valid_types
+
+        return {"Error" : "No items can be displayed"}
 
     def _construct_window(self, item_dict):
         longest_key = max([len(k) for k in item_dict.keys()])
@@ -134,7 +138,9 @@ class Gui(object):
         header_item = self._vault.headers[self._tab]
         (_, lookval) = self._vault[header_item][self._index]
         item_dict = self._vault.decrypt_item(lookval)
+
         item_dict = Gui._filter_display_items(item_dict)
+
         new_window = self._construct_window(item_dict)
         longest_key = max([len(k) for k in item_dict.keys()])
         index = 1
