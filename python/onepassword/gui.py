@@ -113,12 +113,20 @@ class Gui(object):
 
     @staticmethod
     def _filter_display_items(items_dict):
-        blacklist_keys = ["sections", "fields", "URLs", "notesPlain", "passwordHistory"]
-        allowed = {k: v for k, v in items_dict.items() if  v != "" and k not in blacklist_keys}
+        blacklist_keys = ["sections", "URLs", "notesPlain", "passwordHistory"]
+        if "fields" in items_dict and isinstance(items_dict["fields"], list):
+            index = 0
+            for field in items_dict["fields"]:
+                for(key, value) in field.items():
+                    if isinstance(key, str) and isinstance(value, str):
+                        items_dict[key + "_" + str(index)] = value
+                        index += 1
+
+        allowed = {k: v for k, v in items_dict.items() if v != "" and k not in blacklist_keys}
         valid_types = {k: v for k, v in allowed.items() if isinstance(v, str)}
+
         if valid_types.items():
             return valid_types
-
         return {"Error" : "No items can be displayed"}
 
     def _construct_window(self, item_dict):
