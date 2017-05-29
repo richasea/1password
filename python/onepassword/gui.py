@@ -39,6 +39,7 @@ class Gui(object):
         max_lines = vault.max_item_count()
         self._header = self._screen.subwin(2, curses.COLS, 0, 0)
         self._body = curses.newpad(max_lines, curses.COLS)
+        self._screen.untouchwin()
 
     def render_headers(self):
         """
@@ -81,7 +82,6 @@ class Gui(object):
         elif self._index < self._scroll_pos:
             self._scroll_pos = self._index
         self._body.refresh(self._scroll_pos, 0, 2, 0, curses.LINES - 1, curses.COLS)
-        self._body.touchwin()
 
     def _on_tab_changed(self):
         # self._screen.erase()
@@ -172,8 +172,7 @@ class Gui(object):
             if key == 27: # ESC OR ALT
                 break
         del new_window
-        self._screen.touchwin()
-        self._screen.refresh()
+        self.render_items()
 
     @staticmethod
     def teardown():
