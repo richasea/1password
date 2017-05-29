@@ -63,30 +63,36 @@ class Gui(object):
         """
         Renders account information.
         """
-        """
-        index = 2
+        index = 0
         headers = self._vault.headers
         curtab = headers[self._tab]
         items = self._vault[curtab]
         self._scroll_limit = len(items)
-        (height, _) = self._screen.getmaxyx()
         for (name, _) in items:
-            if index - 2 == self._index:
+            if index == self._index:
                 attributes = curses.A_BOLD
             else:
                 attributes = curses.A_NORMAL
-            self._screen.addstr(index, 0, name, attributes)
+            self._body.addstr(index, 0, name, attributes)
             index += 1
-            if index == height:
-                break
-        self._screen.refresh()
-        """
+        self._body.refresh()
+
+    def _get_tab_height(self):
+        tabheader = self._vault.headers[self._tab]
+        tab_items = self._vault[tabheader]
+        height =len(tab_items)
+        if height < 1:
+            return 1
+        return height
 
     def _on_tab_changed(self):
         # self._screen.erase()
         self.render_headers()
         self._index = 0
-        # self.render_items()
+        self._body.erase()
+        self._body.refresh()
+        self._body.resize(self._get_tab_height(), curses.COLS)
+        self.render_items()
         # self._screen.refresh()
 
     def main_loop(self):
