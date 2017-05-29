@@ -85,6 +85,7 @@ class Gui(object):
         # self._screen.erase()
         self.render_headers()
         self._index = 0
+        self._scroll_pos = 0
         self.render_items()
         # self._screen.refresh()
 
