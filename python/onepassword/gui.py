@@ -22,6 +22,7 @@ class Gui(object):
         self._vault = None
         self._tab = 0
         self._scroll_limit = 0
+        self._header = None
 
     def setup(self, vault):
         """
@@ -33,6 +34,7 @@ class Gui(object):
         self._screen.keypad(1)
         curses.curs_set(0)
         self._vault = vault
+        self._header = self._screen.subwin(2, curses.COLS, 0, 0)
 
     def render_headers(self):
         """
@@ -46,16 +48,17 @@ class Gui(object):
             else:
                 attribute = curses.A_NORMAL
 
-            self._screen.addstr(0, pos, header, attribute)
+            self._header.addstr(0, pos, header, attribute)
             index += 1
             pos += len(header) + 1
 
-        (_, width) = self._screen.getmaxyx()
-        self._screen.hline(1, 0, curses.ACS_HLINE, width)
+        self._header.hline(1, 0, curses.ACS_HLINE, curses.COLS)
+        self._header.refresh()
 
     def render_items(self):
         """
         Renders account information.
+        """
         """
         index = 2
         headers = self._vault.headers
@@ -73,6 +76,7 @@ class Gui(object):
             if index == height:
                 break
         self._screen.refresh()
+        """
 
     def _on_tab_changed(self):
         self._screen.erase()
