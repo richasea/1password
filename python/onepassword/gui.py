@@ -23,6 +23,7 @@ class Gui(object):
         self._tab = 0
         self._scroll_limit = 0
         self._header = None
+        self._body = None
 
     def setup(self, vault):
         """
@@ -35,6 +36,9 @@ class Gui(object):
         curses.curs_set(0)
         self._vault = vault
         self._header = self._screen.subwin(2, curses.COLS, 0, 0)
+        self._body = self._screen.subwin(2, 0)
+
+        self._body.refresh()
 
     def render_headers(self):
         """
@@ -79,11 +83,11 @@ class Gui(object):
         """
 
     def _on_tab_changed(self):
-        self._screen.erase()
+        # self._screen.erase()
         self.render_headers()
         self._index = 0
-        self.render_items()
-        self._screen.refresh()
+        # self.render_items()
+        # self._screen.refresh()
 
     def main_loop(self):
         """
