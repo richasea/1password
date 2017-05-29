@@ -76,6 +76,8 @@ class Gui(object):
                 attributes = curses.A_NORMAL
             self._body.addstr(index, 0, name, attributes)
             index += 1
+        if self._index == self._scroll_pos + curses.LINES - 2:
+            self._scroll_pos += 1
         self._body.refresh(self._scroll_pos, 0, 2, 0, curses.LINES - 1, curses.COLS)
         self._body.touchwin()
 
