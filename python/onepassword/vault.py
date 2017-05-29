@@ -110,6 +110,14 @@ class Vault(object):
         else:
             raise NotImplementedError("Only salted data is supported")
 
+    def max_item_count(self):
+        """
+        Returns the maximum number of items in one category.
+        Useful for rendering.
+        """
+        counts = [len(l) for l in self._items.values()]
+        return max(counts)
+
     @staticmethod
     def _gen_key_iv(password, salt):
         """
