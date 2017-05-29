@@ -78,6 +78,8 @@ class Gui(object):
             index += 1
         if self._index == self._scroll_pos + curses.LINES - 2:
             self._scroll_pos += 1
+        elif self._index < self._scroll_pos:
+            self._scroll_pos = self._index
         self._body.refresh(self._scroll_pos, 0, 2, 0, curses.LINES - 1, curses.COLS)
         self._body.touchwin()
 
