@@ -24,6 +24,7 @@ class Gui(object):
         self._scroll_limit = 0
         self._header = None
         self._body = None
+        self._scroll_pos = 0
 
     def setup(self, vault):
         """
@@ -35,10 +36,9 @@ class Gui(object):
         self._screen.keypad(1)
         curses.curs_set(0)
         self._vault = vault
+        max_lines = vault.max_item_count()
         self._header = self._screen.subwin(2, curses.COLS, 0, 0)
-        self._body = self._screen.subwin(2, 0)
-
-        self._body.refresh()
+        self._body = curses.newpad(max_lines, curses.COLS)
 
     def render_headers(self):
         """
@@ -63,6 +63,7 @@ class Gui(object):
         """
         Renders account information.
         """
+        self._body.erase()
         index = 0
         headers = self._vault.headers
         curtab = headers[self._tab]
@@ -75,23 +76,13 @@ class Gui(object):
                 attributes = curses.A_NORMAL
             self._body.addstr(index, 0, name, attributes)
             index += 1
-        self._body.refresh()
-
-    def _get_tab_height(self):
-        tabheader = self._vault.headers[self._tab]
-        tab_items = self._vault[tabheader]
-        height =len(tab_items)
-        if height < 1:
-            return 1
-        return height
+        self._body.refresh(self._scroll_pos, 0, 2, 0, curses.LINES - 1, curses.COLS)
+        self._body.touchwin()
 
     def _on_tab_changed(self):
         # self._screen.erase()
         self.render_headers()
         self._index = 0
-        self._body.erase()
-        self._body.refresh()
-        self._body.resize(self._get_tab_height(), curses.COLS)
         self.render_items()
         # self._screen.refresh()
 
