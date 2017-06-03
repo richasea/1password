@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='1password',
-      version='1.0',
+      version='0.9',
       description='A python client for 1pasword vaults',
       author='Sean Richardson',
       author_email='richasea@gmail.com',
