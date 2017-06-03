@@ -6,3 +6,5 @@ build
 *.swp
 # ignore virtual env directory
 1password
+dist/
+*.egg-info

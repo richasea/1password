@@ -7,16 +7,13 @@ Usual warnings apply: This software is not supported by AgileBits.
 Although I have taken care not to make stupid mistakes, this software is probably insecure and I accept no responsibility for your account getting compromised as a result of you using it. **You install this software at your own risk.**
 
 ## Installation
-First install dependencies:
-```bash
-pip install -r requirements.txt
 ```
-And then install the software itself.
+Install the software by running:
 ```bash
 sudo ./setup.py install
 ```
 
-## Usage:
+## Usage
 First create a config file in your home directory called '.1password'
 it should look similar to this:
 ```
